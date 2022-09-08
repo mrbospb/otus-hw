@@ -13,12 +13,10 @@ sgdisk -n 1:0:1G /dev/md/raid10
 mkdir /etc/mdadm
 echo "DEVICE partitions" > /etc/mdadm/mdadm.conf && mdadm --detail --scan --verbose | awk '/ARRAY/ {print}' >> /etc/mdadm/mdadm.conf
 
-sgdisk /dev/sdc
 for i in {1..5} ; do
 	sgdisk -n ${i}:0:+100M /dev/sdc ;
 done
 lsblk
-sgdisk /dev/sdc
 
 mkdir /mnt/raid10
 mkfs /dev/md/raid10p*
