@@ -1,18 +1,13 @@
 #!/bin/bash
 
 # Установка софта
-mkdir -p ~root/.ssh
-cp ~vagrant/.ssh/auth* ~root/.ssh
-yum install -y mdadm smartmontools hdparm gdisk xfsdump
+yum install -y mdadm smartmontools hdparm gdisk xfsdump # multipath busybox cryptsetup dmraid ntfs-3g
 
 # Готовим временный том под /
-pvcreate /dev/sdb
-vgcreate vg_root /dev/sdb
-lvcreate -n lv_root -l +100%FREE /dev/vg_root
+pvcreate /dev/sdb && vgcreate vg_root /dev/sdb && lvcreate -n lv_root -l +100%FREE /dev/vg_root
 
 # Создаем файловую систему и монтируем ее в /mnt
-mkfs.xfs /dev/vg_root/lv_root
-mount /dev/vg_root/lv_root /mnt
+mkfs.xfs /dev/vg_root/lv_root && mount /dev/vg_root/lv_root /mnt
 
 # Cкопируем все данные с / раздела в /mnt
 xfsdump -J - /dev/VolGroup00/LogVol00 | xfsrestore -J - /mnt
@@ -29,7 +24,7 @@ grub2-mkconfig -o /boot/grub2/grub.cfg
 cd /boot ; for i in `ls initramfs-*img`; do dracut -v $i `echo $i|sed "s/initramfs-//g; s/.img//g"` --force; done
 
 # Замена строки в файле
-sed 's/d.lvm.lv=VolGroup00\/LogVol00/d.lvm.lv=vg_root\/lv_root/'
+sed 's/d.lvm.lv=VolGroup00\/LogVol00/d.lvm.lv=vg_root\/lv_root/' /boot/grub2/grub.cfg 
 
 # Презагрузим
 reboot
