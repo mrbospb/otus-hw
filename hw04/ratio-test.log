@@ -1,0 +1,57 @@
+[root@serverhw04 vagrant]# zpool create labpool mirror sdb sdc
+[root@serverhw04 vagrant]# zpool status
+  pool: labpool
+ state: ONLINE
+config:
+
+	NAME        STATE     READ WRITE CKSUM
+	labpool     ONLINE       0     0     0
+	  mirror-0  ONLINE       0     0     0
+	    sdb     ONLINE       0     0     0
+	    sdc     ONLINE       0     0     0
+
+errors: No known data errors
+[root@serverhw04 vagrant]# for i in gzip-1 gzip gzip-9 zle lzjb lz4; do zfs create labpool\/fs_$i  &&  zfs set compression=$i labpool\/fs_$i ;  done
+[root@serverhw04 vagrant]# zfs list
+NAME                USED  AVAIL     REFER  MOUNTPOINT
+labpool             314K   832M       30K  /labpool
+labpool/fs_gzip      24K   832M       24K  /labpool/fs_gzip
+labpool/fs_gzip-1    24K   832M       24K  /labpool/fs_gzip-1
+labpool/fs_gzip-9    24K   832M       24K  /labpool/fs_gzip-9
+labpool/fs_lz4       24K   832M       24K  /labpool/fs_lz4
+labpool/fs_lzjb      24K   832M       24K  /labpool/fs_lzjb
+labpool/fs_zle       24K   832M       24K  /labpool/fs_zle
+[root@serverhw04 vagrant]# wget -O /tmp/WaP.txt http://www.gutenberg.org/ebooks/2600.txt.utf-8
+--2022-09-08 21:09:28--  http://www.gutenberg.org/ebooks/2600.txt.utf-8
+Resolving www.gutenberg.org (www.gutenberg.org)... 152.19.134.47
+Connecting to www.gutenberg.org (www.gutenberg.org)|152.19.134.47|:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://www.gutenberg.org/ebooks/2600.txt.utf-8 [following]
+--2022-09-08 21:09:29--  https://www.gutenberg.org/ebooks/2600.txt.utf-8
+Connecting to www.gutenberg.org (www.gutenberg.org)|152.19.134.47|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://www.gutenberg.org/cache/epub/2600/pg2600.txt [following]
+--2022-09-08 21:09:30--  https://www.gutenberg.org/cache/epub/2600/pg2600.txt
+Reusing existing connection to www.gutenberg.org:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 3359372 (3.2M) [text/plain]
+Saving to: '/tmp/WaP.txt'
+
+/tmp/WaP.txt                        100%[=================================================================>]   3.20M   780KB/s    in 5.0s    
+
+2022-09-08 21:09:35 (661 KB/s) - '/tmp/WaP.txt' saved [3359372/3359372]
+
+[root@serverhw04 vagrant]# ls -al /tmp/WaP.txt
+-rw-r--r--. 1 root root 3359372 Sep  2 08:56 /tmp/WaP.txt
+
+
+[root@serverhw04 vagrant]# for i in gzip-1 gzip gzip-9 zle lzjb lz4; do cp /tmp/WaP.txt \/labpool\/fs_$i ; done
+[root@serverhw04 vagrant]# zfs list -o name,compression,compressratio,used -s used
+NAME               COMPRESS        RATIO   USED
+labpool/fs_gzip-9  gzip-9          2.67x  1.23M
+labpool/fs_gzip    gzip            2.67x  1.24M
+labpool/fs_gzip-1  gzip-1          2.28x  1.44M
+labpool/fs_lz4     lz4             1.63x  2.02M
+labpool/fs_lzjb    lzjb            1.36x  2.41M
+labpool/fs_zle     zle             1.01x  3.23M
+labpool            off             1.70x  11.7M
