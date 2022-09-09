@@ -4,6 +4,7 @@
   Volume group "vg_var" successfully created
   Rounding up size to full physical extent 952.00 MiB
   Logical volume "lv_var" created.
+
 [root@lvm boot]# mkfs.ext4 /dev/vg_var/lv_var && mount /dev/vg_var/lv_var /mnt
 mke2fs 1.42.9 (28-Dec-2013)
 Filesystem label=
@@ -27,16 +28,23 @@ Creating journal (4096 blocks): done
 Writing superblocks and filesystem accounting information: done
 
 [root@lvm boot]# cp -aR /var/* /mnt/ # rsync -avHPSAX /var/ /mnt/
+
 [root@lvm boot]# mkdir /tmp/oldvar && mv /var/* /tmp/oldvar
+
 [root@lvm boot]# umount /mnt && mount /dev/vg_var/lv_var /var
+
 [root@lvm boot]# echo "`blkid | grep var: | awk '{print $2}'` /var ext4 defaults 0 0" >> /etc/fstab
+
 [root@lvm boot]# reboot
 Running in chroot, ignoring request.
+
 [root@lvm boot]# exit
 exit
+
 [root@lvm vagrant]# reboot
 
 [vagrant@lvm ~]$ sudo bash
+
 [root@lvm vagrant]# lvremove /dev/vg_root/lv_root && vgremove /dev/vg_root && pvremove /dev/sdb
 Do you really want to remove active logical volume vg_root/lv_root? [y/n]: y
   Logical volume "lv_root" successfully removed

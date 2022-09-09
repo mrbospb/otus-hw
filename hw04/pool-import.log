@@ -1,0 +1,98 @@
+[vagrant@serverhw04 tmp]$ wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1KRBNW33QWqbvbVHa3hLJivOAt60yukkg' -O /tmp/zfs_task1.tar.gz
+--2022-09-09 07:29:12--  https://docs.google.com/uc?export=download&id=1KRBNW33QWqbvbVHa3hLJivOAt60yukkg
+Resolving docs.google.com (docs.google.com)... 74.125.131.194
+Connecting to docs.google.com (docs.google.com)|74.125.131.194|:443... connected.
+HTTP request sent, awaiting response... 303 See Other
+Location: https://doc-0c-bo-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/96821lkif8n8dntajogrsk0mptof1ld5/1662708525000/16189157874053420687/*/1KRBNW33QWqbvbVHa3hLJivOAt60yukkg?e=download&uuid=0451dd16-491f-4707-b43a-6c2200bd25a1 [following]
+Warning: wildcards not supported in HTTP.
+--2022-09-09 07:29:17--  https://doc-0c-bo-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/96821lkif8n8dntajogrsk0mptof1ld5/1662708525000/16189157874053420687/*/1KRBNW33QWqbvbVHa3hLJivOAt60yukkg?e=download&uuid=0451dd16-491f-4707-b43a-6c2200bd25a1
+Resolving doc-0c-bo-docs.googleusercontent.com (doc-0c-bo-docs.googleusercontent.com)... 142.250.150.132
+Connecting to doc-0c-bo-docs.googleusercontent.com (doc-0c-bo-docs.googleusercontent.com)|142.250.150.132|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 7275140 (6.9M) [application/x-gzip]
+Saving to: '/tmp/zfs_task1.tar.gz'
+
+/tmp/zfs_task1.tar.gz                100%[======================================================================>]   6.94M  3.35MB/s    in 2.1s    
+
+2022-09-09 07:29:19 (3.35 MB/s) - '/tmp/zfs_task1.tar.gz' saved [7275140/7275140]
+
+[vagrant@serverhw04 tmp]$ ll
+total 10396
+-rw-r--r--. 1 root    root    3359372 Sep  2 08:56 WaP.txt
+drwx------. 3 root    root         17 Sep  9 07:09 systemd-private-32e739ad1f314246bad37a31a35d3c2b-chronyd.service-h2eYRE
+-rwx--x--x. 1 vagrant vagrant     380 Sep  8 20:36 vagrant-shell
+-rw-rw-r--. 1 vagrant vagrant 7275140 Sep  9 07:29 zfs_task1.tar.gz
+
+[vagrant@serverhw04 tmp]$ tar xvf /tmp/zfs_task1.tar.gz -C /tmp
+zpoolexport/
+zpoolexport/filea
+zpoolexport/fileb
+
+[vagrant@serverhw04 tmp]$ ll
+total 10396
+-rw-r--r--. 1 root    root    3359372 Sep  2 08:56 WaP.txt
+drwx------. 3 root    root         17 Sep  9 07:09 systemd-private-32e739ad1f314246bad37a31a35d3c2b-chronyd.service-h2eYRE
+-rwx--x--x. 1 vagrant vagrant     380 Sep  8 20:36 vagrant-shell
+-rw-rw-r--. 1 vagrant vagrant 7275140 Sep  9 07:29 zfs_task1.tar.gz
+drwxr-xr-x. 2 vagrant vagrant      32 May 15  2020 zpoolexport
+
+[vagrant@serverhw04 tmp]$ sudo bash
+
+[root@serverhw04 tmp]# zpool import -h
+invalid option 'h'
+usage:
+	import [-d dir] [-D]
+	import [-o mntopts] [-o property=value] ... 
+	    [-d dir | -c cachefile] [-D] [-l] [-f] [-m] [-N] [-R root] [-F [-n]] -a
+	import [-o mntopts] [-o property=value] ... 
+	    [-d dir | -c cachefile] [-D] [-l] [-f] [-m] [-N] [-R root] [-F [-n]]
+	    [--rewind-to-checkpoint] <pool | id> [newpool]
+
+[root@serverhw04 tmp]# zpool import -d zpoolexport/
+   pool: otus
+     id: 6554193320433390805
+  state: ONLINE
+status: Some supported features are not enabled on the pool.
+	(Note that they may be intentionally disabled if the
+	'compatibility' property is set.)
+ action: The pool can be imported using its name or numeric identifier, though
+	some features will not be available without an explicit 'zpool upgrade'.
+ config:
+
+	otus                        ONLINE
+	  mirror-0                  ONLINE
+	    /tmp/zpoolexport/filea  ONLINE
+	    /tmp/zpoolexport/fileb  ONLINE
+
+[root@serverhw04 tmp]# zpool import -d zpoolexport/ otus
+
+[root@serverhw04 tmp]# zpool import -d zpoolexport/
+no pools available to import
+
+[root@serverhw04 tmp]# zpool status otus
+  pool: otus
+ state: ONLINE
+status: Some supported and requested features are not enabled on the pool.
+	The pool can still be used, but some features are unavailable.
+action: Enable all features using 'zpool upgrade'. Once this is done,
+	the pool may no longer be accessible by software that does not support
+	the features. See zpool-features(7) for details.
+config:
+
+	NAME                        STATE     READ WRITE CKSUM
+	otus                        ONLINE       0     0     0
+	  mirror-0                  ONLINE       0     0     0
+	    /tmp/zpoolexport/filea  ONLINE       0     0     0
+	    /tmp/zpoolexport/fileb  ONLINE       0     0     0
+
+errors: No known data errors
+[root@serverhw04 tmp]# zpool list -o name,size otus
+NAME   SIZE
+otus   480M
+
+[root@serverhw04 tmp]# zfs get available,recordsize,compression,checksum otus
+NAME  PROPERTY     VALUE           SOURCE
+otus  available    350M            -
+otus  recordsize   128K            local
+otus  compression  zle             local
+otus  checksum     sha256          local

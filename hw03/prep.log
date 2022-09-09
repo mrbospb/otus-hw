@@ -1,8 +1,10 @@
 [vagrant@lvm ~]$ sudo bash
+
 [root@lvm vagrant]# pvcreate /dev/sdb && vgcreate vg_root /dev/sdb && lvcreate -n lv_root -l +100%FREE /dev/vg_root
   Physical volume "/dev/sdb" successfully created.
   Volume group "vg_root" successfully created
   Logical volume "lv_root" created.
+
 [root@lvm vagrant]# mkfs.xfs /dev/vg_root/lv_root && mount /dev/vg_root/lv_root /mnt
 meta-data=/dev/vg_root/lv_root   isize=512    agcount=4, agsize=655104 blks
          =                       sectsz=512   attr=2, projid32bit=1
@@ -13,6 +15,7 @@ naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
 log      =internal log           bsize=4096   blocks=2560, version=2
          =                       sectsz=512   sunit=0 blks, lazy-count=1
 realtime =none                   extsz=4096   blocks=0, rtextents=0
+
 [root@lvm vagrant]# xfsdump -J - /dev/VolGroup00/LogVol00 | xfsrestore -J - /mnt
 xfsdump: using file dump (drive_simple) strategy
 xfsdump: version 3.1.7 (dump format 3.0)
@@ -56,16 +59,21 @@ xfsdump: dump complete: 5 seconds elapsed
 xfsdump: Dump Status: SUCCESS
 xfsrestore: restore complete: 5 seconds elapsed
 xfsrestore: Restore Status: SUCCESS
+
 [root@lvm vagrant]# ls /mnt
 bin   dev  home  lib64  mnt  proc  run   srv  tmp  vagrant
 boot  etc  lib   media  opt  root  sbin  sys  usr  var
+
 [root@lvm vagrant]# for i in /proc/ /sys/ /dev/ /run/ /boot/; do mount --bind $i /mnt/$i; done
+
 [root@lvm vagrant]# chroot /mnt/
+
 [root@lvm /]# grub2-mkconfig -o /boot/grub2/grub.cfg
 Generating grub configuration file ...
 Found linux image: /boot/vmlinuz-3.10.0-862.2.3.el7.x86_64
 Found initrd image: /boot/initramfs-3.10.0-862.2.3.el7.x86_64.img
 done
+
 [root@lvm /]# cd /boot ; for i in `ls initramfs-*img`; do dracut -v $i `echo $i|sed "s/initramfs-//g; s/.img//g"` --force; done
 Executing: /sbin/dracut -v initramfs-3.10.0-862.2.3.el7.x86_64.img 3.10.0-862.2.3.el7.x86_64 --force
 dracut module 'busybox' will not be installed, because command 'busybox' could not be found!
@@ -121,7 +129,9 @@ Skipping udev rule: 91-permissions.rules
 *** Creating image file ***
 *** Creating image file done ***
 *** Creating initramfs image file '/boot/initramfs-3.10.0-862.2.3.el7.x86_64.img' done ***
+
 [root@lvm boot]# vi /boot/grub2/grub.cfg
+
 [root@lvm boot]# cat /boot/grub2/grub.cfg | grep vg_root
 	linux16 /vmlinuz-3.10.0-862.2.3.el7.x86_64 root=/dev/mapper/vg_root-lv_root ro no_timer_check console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 elevator=noop crashkernel=auto rd.lvm.lv=vg_root/lv_root rd.lvm.lv=VolGroup00/LogVol01 rhgb quiet
 
@@ -138,6 +148,7 @@ sdb                       8:16   0   10G  0 disk
 sdc                       8:32   0    2G  0 disk 
 sdd                       8:48   0    1G  0 disk 
 sde                       8:64   0    1G  0 disk 
+
 [vagrant@lvm ~]$ df -h
 Filesystem                   Size  Used Avail Use% Mounted on
 /dev/mapper/vg_root-lv_root   10G  831M  9.2G   9% /
