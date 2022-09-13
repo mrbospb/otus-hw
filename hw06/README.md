@@ -1,4 +1,5 @@
 # Description
+Vagrantfile and scripts from hw05.
 Vagrant creates 2 VM's (server and client) with NFS folder `/srv/nfs/upload/`
 # How-to
 Use `vagrant up` to start VM's
