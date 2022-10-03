@@ -23,8 +23,10 @@ Homework repo for OTUS Linux Professional course
 * Написать свой systemd unit
 ### hw09 Bash 
 * Пишем скрипт
-### hw10 
-### hw11 
+### hw10 Управление процессами 
+* Написать скрипт
+### hw11 Ansible
+* Пишем playbook/роль
 ### hw12 
 ### hw13 
 ### hw14 
