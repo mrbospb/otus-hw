@@ -19,6 +19,7 @@ a0d4887ca2bb   prom/prometheus:v2.41.0     "/bin/prometheus --c…"   4 minutes 
 * `http://{host_ip}:9090`     Prometheus
 * `http://{host_ip}:3000`     Grafana
 * `http://{host_ip}:9100`     Node exporter
+
 В настройках Grafana в разделе Data sources добавить Prometheus, указав URL `http://prometheus:9090`.
 
 Создать собственный дашборд или воспользоваться уже готовыми шаблонами с официального сайта (Grafana)[https://grafana.com/grafana/dashboards/]
